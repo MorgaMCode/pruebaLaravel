@@ -1,0 +1,26 @@
+.el-radio{
+    .el-radio__input{
+        .el-radio__inner{
+            transform: scale(1.2) !important;
+            border: 1px solid var(--whitesmoke) !important;
+        }
+        &.is-checked{
+            .el-radio__inner{
+                border: 1px solid var(--green-clear) !important;
+                background-color: transparent;
+                &:after{
+                    background-color: var(--green-clear);
+                    width: 9.8px !important;
+                    height: 9.8px !important;
+                }
+            }
+        }
+    }
+    .el-radio__label{
+        color: 1px solid var(--grey-light) !important;
+    }
+}
+
+// is-checked  cuando esta activo
+// transform -- scale(1.2) cuando esta inactivo
+// el-radio el principal
