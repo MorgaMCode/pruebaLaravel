@@ -82,4 +82,8 @@ This template should help get you started developing with Vue 3 in Vite. The tem
 >>>>>>> 764c02f (first commit)
 =======
 # pruebaVue
+<<<<<<< HEAD
 >>>>>>> efa3eec (first commit)
+=======
+# VueIntegrar
+>>>>>>> 189780b (first commit)
