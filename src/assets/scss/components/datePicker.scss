@@ -1,0 +1,13 @@
+
+.el-input--large{
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    .el-input__wrapper{
+        cursor:  pointer !important;
+        box-shadow: none !important;
+    }
+    .el-input__icon{
+        display: none !important;
+    }
+}

@@ -1,0 +1,40 @@
+.cell{
+    color: black !important;
+    .el-none-outline{
+        margin-left: 10px !important;
+    }
+    .el-table__column-filter-trigger i{
+        color: black !important;
+    }
+}
+
+.el-table__row{
+    .el-table_1_column_1{
+        &.el-table__cell{
+            // .cell{
+            //     text-align: center !important;
+            // }
+        }
+    }
+}
+
+.el-table__header{
+    width: 100% !important;
+    height: 60px !important;
+}
+.el-table__body-wrapper{
+    .el-table__body{
+        width: 100% !important;
+    }
+}
+
+.el-table__empty-text{
+    width: 100% !important;
+    content: 'hola' !important;
+}
+
+.el-table__inner-wrapper{
+    &::before{
+        background-color: white !important;
+    }
+}

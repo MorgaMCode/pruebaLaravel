@@ -1,0 +1,7 @@
+.el-popper{
+    max-height: 512px;
+    overflow: auto;
+    &::-webkit-scrollbar{
+        display: none;
+    }
+}

@@ -1,0 +1,13 @@
+.el-dropdown__popper{
+    border-radius: 8px !important;
+    .el-scrollbar{
+        padding: 5px 0px 20px 0px !important;
+        .el-dropdown-menu__item{
+            &:hover{
+                background-color: transparent !important;
+                color: black !important;
+            }
+        }
+    }
+}
+
