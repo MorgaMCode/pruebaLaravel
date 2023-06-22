@@ -137,7 +137,7 @@ const radio = ref(1)
 // variable que guarda la informacion sacada del array con el metodo find
 // variable que guarda el id de la ruta del editar
 let editRoute = parseInt(route.params.id)
-console.log('Estoy en esta ruta', route.name);
+// console.log('Estoy en esta ruta', route.name);
 
 const informationComissionPlans = ref({
     nombre: '',
@@ -203,7 +203,7 @@ async function submitForm(event){
 
 async function editComissionPlan(){
     let updateEdit = await axios.put(`api/parametrizacion/planes-de-comision/${informationComissionPlans.value.id}`, informationComissionPlans.value)
-    console.log('Esto es lo que estamos enviando: ', informationComissionPlans.value);
+    // console.log('Esto es lo que estamos enviando: ', informationComissionPlans.value);
     router.push({ name: 'parameterization.comissionPlans' })
 }
 

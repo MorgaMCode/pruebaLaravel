@@ -5,12 +5,12 @@ export default [
         component: () => import('../pages/index.vue'),
         children: [
             {
-                path: '',
+                path: '13',
                 name: 'orders',
                 component: () => import('../pages/orders.vue'),
                 children: [
                     {
-                        path: '13/orden/:id',
+                        path: 'orden/:id',
                         name: 'orders.actives',
                         component: () => import('../pages/ordersActives.vue')
                     }

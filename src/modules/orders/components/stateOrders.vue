@@ -18,10 +18,11 @@ let props = defineProps({
 })
 
 const stateValue = {
-    1: { bg: 'bg-orange', icon: 'icon-orders-outline', text: 'Por aceptar' },
-    2: { bg: 'bg-yellow', icon: 'icon-check', text: 'Aceptado' },
-    3: { bg: 'bg-blueOscuro', icon: 'icon-cooking', text: 'Preparando' },
-    4: { bg: 'bg-blue-state-lightest', textColor: 'text-blue',icon: 'icon-delivery', text: 'En camino' },
+    11: { bg: 'bg-orange', icon: 'icon-orders-outline', text: 'Por aceptar' },
+    12: { bg: 'bg-yellow', icon: 'icon-check', text: 'Aceptado' },
+    13: { bg: 'bg-blueOscuro', icon: 'icon-cooking', text: 'Preparando' },
+    14: { bg: 'bg-blue-state-lightest', textColor: 'text-blue',icon: 'icon-delivery', text: 'En camino' },
+    15: { bg: 'bg-green-clear', textColor: 'text-black',icon: 'icon-box-delivery', text: 'por entregar' },
 }
 
 </script>

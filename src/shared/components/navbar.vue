@@ -40,7 +40,7 @@
                         </template>
                         <template #default>
                             <template v-if="i === 0">
-                                <div v-for="admin in desplegableAdministracionInfo" class="icon-hover-blue cr-pointer w-223px br-4 ps-2 py-1" style="transition: .3s all;">
+                                <div v-for="(admin, i) in desplegableAdministracionInfo" :key="i" class="icon-hover-blue cr-pointer w-223px br-4 ps-2 py-1" style="transition: .3s all;">
                                     <div class="d-middle gap-2">
                                         <img :src="admin.image" alt="" class="wh-39" />
                                         <div>

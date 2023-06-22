@@ -65,11 +65,11 @@ function selected(id){
 }
 
 function selectedDropdown(){
-    console.log('Dropdown seleccionado');
+    
 }
 
 function seeDropdownSelected(){
-    console.log('Este es el array: ', seeSelected.value);
+    
 }
 
 </script>
