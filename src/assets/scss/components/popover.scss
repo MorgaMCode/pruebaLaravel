@@ -1,5 +1,6 @@
 .el-popper{
     max-height: 512px;
+    min-width: 190px !important;
     overflow: auto;
     &::-webkit-scrollbar{
         display: none;

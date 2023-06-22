@@ -61,7 +61,7 @@ onMounted(() => {
 async function viewRuta(){
     let historyStore = await axios.get(`api/restaurantes/${route.params.id}/tiendas/${route.params.idStore}/estado`)
     informationStatesBox.value = historyStore.data?.data ?? []
-    console.log('Estoy en esta ruta: ', route);
+    // console.log('Estoy en esta ruta: ', route);
 }
 
 </script>

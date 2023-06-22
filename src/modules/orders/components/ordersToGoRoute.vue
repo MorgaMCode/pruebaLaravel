@@ -1,5 +1,4 @@
 <template>
-   
     <div
         class="hoverOrders d-middle border-bottom cr-pointer hM-129px gap-3 py-2 pe-2"
         :class="{ 'orderSelected':  ordenes?.id == route.params.id  }"
@@ -7,8 +6,8 @@
     >
         <div class='lineBlueLeft w-4px hf-105px bg-blue' style="border-radius: 0px 2px 2px 0px;" />
         <div class="d-flex j-center flex-column gap-1 h-100">
-            <p class="f-medium f-14">No.  00011 </p>
-            <p class="text-whitesmoke f-12">$ {{ ordenes?.valorFinal }} <span class="text-blue-dark">({{ ordenes?.entregaHora }})</span> </p>
+            <p class="f-medium f-14">No.  {{ ordenes?.id }} </p>
+            <p class="text-whitesmoke f-12">$ {{ ordenes?.valorFinal }} <span class="text-blue-dark">({{ ordenes?.cantidadProductos }})</span> </p>
             <div class="d-middle text-whitesmoke">
                 <i class="icon-clock f-18" />
                 <p class="f-12">Pedido: {{ ordenes?.horaCreado }}</p>
@@ -16,17 +15,23 @@
             <p v-if="ordenes?.entregaBarrio" class="text-whitesmoke f-12">{{ ordenes?.entregaBarrio }}</p>
         </div>
         <div class="d-flex j-center flex-column a-end gap-1 ms-auto h-100">
-            <stateOrders :states="ordenes?.estado" />
-            <div class="d-middle">
-                <p class="f-12" :class="[ ordenes?.icon ? 'text-orange':  'text-whitesmoke']">{{ tipoPedido(ordenes?.tipoPedido)   }}</p>
-                <div class="wh-20 d-middle-center">
-                    <i class="text-orange f-20" :class="ordenes?.icon" />
+            <div class="d-middle gap-4">
+                <div v-if="ordenes?.tieneChat" class="bg-orange rounded-pill d-middle-center text-white h-25px">
+                    <i class="icon-chat f-25" />
                 </div>
+                <stateOrders :states="ordenes?.estado" />
             </div>
             <div class="d-middle text-blue f-12">
-                <i class="icon-clock f-18" />
+                <i class="icon-delivery f-18" />
                 <p>Entrega: {{ ordenes?.entregaHora }}</p>
             </div>
+            <div class="d-middle">
+                <p class="f-12" :class="[ styleTipoPedido[ordenes.tipoPedido].textColor]">{{  styleTipoPedido[ordenes.tipoPedido].text  }}</p>
+                <div class="wh-20 d-middle-center">
+                    <i class="text-orange f-20" :class="styleTipoPedido[ordenes.tipoPedido].icon" />
+                </div>
+            </div>
+            
             <template v-if="ordenes?.entregaBarrio">
                 <div class="d-middle" v-if="ordenes?.valorDomicilio?? 'sin costo'" >
                     <i class="icon-delivery f-24" />
@@ -74,11 +79,12 @@ let props = defineProps({
     }
 })
 
-const tipoPedido = (elem)=>{
-    if (elem  == 1 ) return 'Domicilio'
-    else if (elem == 2 ) return 'Recoger en Tienda' 
-    else if (elem == 3 ) return 'Servir en mesa'
+const styleTipoPedido = {
+    1:{  text: 'Domicilio', textColor: 'text-whitesmoke'},
+    2:{  text: 'Recoge en tienda ', textColor: 'text-orange', icon: 'icon-restaurant' },
+    3:{  text: 'Servir en mesa', textColor: 'text-orange' , icon: 'icon-table',}
 }
+
 let emit = defineEmits(['toGoOrders'])
 
 </script>

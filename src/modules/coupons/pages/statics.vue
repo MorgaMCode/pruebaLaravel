@@ -157,11 +157,11 @@ const data = [ { text: 'Clasi'}, { text: 'Plans'} ]
 
 function seeDropdownSelected(){
     if(selectedClasfication.value.length || selectedPlan.value.length || selectedRestaurant.value.length){
-        selectedClasfication.value.forEach((e) => console.log('Selected clasification: ',e))
-        selectedPlan.value.forEach((e) => console.log('Selected plan: ',e))
-        selectedRestaurant.value.forEach((e) => console.log('Selected restaurant: ',e))
+        // selectedClasfication.value.forEach((e) => console.log('Selected clasification: ',e))
+        // selectedPlan.value.forEach((e) => console.log('Selected plan: ',e))
+        // selectedRestaurant.value.forEach((e) => console.log('Selected restaurant: ',e))
     }else {
-        console.log('no hay nada para filtrar');
+        // console.log('no hay nada para filtrar');
     }
 }
 
@@ -171,7 +171,7 @@ function cleanFilter(){
         selectedPlan.value = []
         selectedRestaurant.value = []
     }else {
-        console.log('no hay nada para limpiar');
+        // console.log('no hay nada para limpiar');
     }
 }
 

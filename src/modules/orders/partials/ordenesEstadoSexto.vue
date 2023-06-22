@@ -135,7 +135,7 @@ function openModalVerUbicacionDomiciliario(){
 }
 
 function sendImageFile(e){
-    console.log('Esto ejecuta');
+    // console.log('Esto ejecuta');
     let reader = new FileReader()
     reader.addEventListener('load', () => {
         chatDeLaOrden.value.unshift({ type: 2, url: reader.result, horaEstandar: new Date() })
@@ -144,7 +144,7 @@ function sendImageFile(e){
 }
 
 function addMessageChat(message){
-    console.log('Esto si se ejecuta');
+    // console.log('Esto si se ejecuta');
     if(message !== ''){
         chatDeLaOrden.value.unshift({ type: 2, message: message, horaEstandar: new Date() })
     }
