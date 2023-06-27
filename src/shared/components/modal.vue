@@ -16,15 +16,17 @@
             </div>
         </template>
         <div
-            class="border-top w-100 hM-500px overflow-auto hidden-scroll"
-            style="right: 0.5px; bottom: 70px;"
+            class="border-top w-100 hM-500px overflow-auto hidden-scroll h-100"
+            
         >
             <slot></slot>
         </div>
-        <div class="py-3 px-3 d-flex j-end" style="border-top: 2px solid #eeeeee;" v-if="seeButtonsBottom" >
-            <button class="w-110px h-36px rounded-2 border bg-white f-14 me-2" @click="visible = false" >{{ cancel }}</button>
-            <button :class="widthButtonAction" class="h-36px rounded-2 bg-general text-white border-0 px-4" @click="emit('buttonAction')" >{{ action }}</button>
-        </div>
+        <template #footer>
+            <div class="pt-2 d-flex j-end" style="border-top: 2px solid #eeeeee;" v-if="seeButtonsBottom" >
+                <button class="w-110px h-36px rounded-2 border bg-white f-14 me-2" @click="visible = false" >{{ cancel }}</button>
+                <button :class="widthButtonAction" class="h-36px rounded-2 bg-general text-white border-0 px-4" @click="emit('buttonAction'),visible = false" >{{ action }}</button>
+            </div>
+        </template>
     </el-dialog>
 </template>
 

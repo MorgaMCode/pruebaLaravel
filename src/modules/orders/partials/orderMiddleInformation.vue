@@ -2,36 +2,32 @@
     <section>
         <div>
             <ordenesEstadoPrincipalArriba :state="state" />
-            <ordenesEstadoPrimero v-if="state?.state === 1" />
-            <ordenesEstadoSegundo v-else-if="state?.state !== 11" 
-            :infoBasicOrder="state" />
-        </div>
-        <div v-if="state?.state === 1">
-            <ordenesEstadoSegundo />
+            <ordenesEstadoPrimero   :datas="state.historialCedida" />
+            <ordenesEstadoSegundo v-if="state?.state !== 11" :infoBasicOrder="state" />
         </div>
         <div>
-            <ordenesEstadoTercero />
+            <ordenesEstadoTercero :infoUser="dataInfoUser" />
         </div>
         <div>
-            <ordenesEstadoCuarto />
+            <ordenesEstadoCuarto  />
+        </div>
+        <div v-if="dataInfoDelivery.idUserDelivery">
+            <ordenesEstadoSexto  :infoDelivery="dataInfoDelivery"  :reloadDeliveryThree="reloadDeliveryTwo" />
+        </div>
+        <div v-else >
+            <ordenesEstadoQuinto  :reloadDeliveryThree="reloadDeliveryTwo" />
+        </div>
+        <div >
+            <ordenesEstadoSeptimo :infoDetail="collectDetail" :envioCobro="buttonAction" />
         </div>
         <div>
-            <ordenesEstadoQuinto />
+            <ordenesEstadoOctavo :instructions="instructions" />
         </div>
-        <div>
-            <ordenesEstadoSexto />
-        </div>
-        <div>
-            <ordenesEstadoSeptimo />
-        </div>
-        <div>
-            <ordenesEstadoOctavo />
-        </div>
-        <div v-if="state?.state !== 1">
+        <div >
             <ordenesEstadoPrimero />
         </div>
         <div>
-            <ordenesEstadoNoveno />
+            <ordenesEstadoNoveno :dataHistory="getStatusOrderHistory"/>
         </div>
     </section>
 </template>
@@ -49,15 +45,47 @@ import ordenesEstadoOctavo from './ordenesEstadoOctavo.vue';
 import ordenesEstadoNoveno from './ordenesEstadoNoveno.vue'
 
 
+const emit = defineEmits(['postDeliveryGrandFather']);
+
 let props = defineProps({
     state:{
         type: Object,
         required: false,
         default: () => {}
+    },
+    dataInfoUser:{
+        type: Object,
+        required: false,
+        default: () => {}
+    },
+    dataInfoDelivery:{
+        type: Object,
+        required: false,
+        default: () => {}
+    },
+    reloadDeliveryTwo:{
+        type:Function
+    },
+    collectDetail:{
+        type:Object,
+        required: false,
+        default: () => {}
+    },
+    buttonAction:{
+        type:Function
+    },
+    instructions:{
+        type:Object
+    },
+    getStatusOrderHistory:{
+        type:Array
     }
 })
 
+
+
 </script>
+
 
 <style lang="scss" scoped>
 section{

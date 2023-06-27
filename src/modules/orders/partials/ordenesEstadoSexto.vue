@@ -1,10 +1,11 @@
 <template>
     <div class="p-3">
         <div class="d-flex">
-            <img src="/img/emptyState/woUsers.jpg" alt="iconPerson" class="wh-32" />
+            <img :src="infoDelivery.fotoMini" alt="iconPerson" class="wh-32" />
             <div>
+                
                 <div class="d-middle gap-3">
-                    <p>Daniel Correa</p>
+                    <p>{{ infoDelivery?.nombre }}</p>
                     <el-tooltip content="Eliminar domiciliario" placement="bottom" effect="light">
                         <div
                             class="item-with-hover d-middle-center cr-pointer rounded-circle wh-32"
@@ -15,21 +16,35 @@
                         </div>
                     </el-tooltip>
                 </div>
-                <p>id: 12345</p>
+                <p>id: {{ infoDelivery?.idUserDelivery }}</p>
             </div>
             <div class="ms-auto">
-                <div v-for="calification in calificationDomiciliario" class="d-middle gap-2 mb-2">
+                <div    class="d-middle gap-2 mb-2">
                     <div class="d-middle gap-2 bg-orange-badge rounded-pill p-1 pe-2">
                         <div class="wh-24 d-middle-center">
                             <i class="icon-star text-orange f-25" />
                         </div>
-                        <p class="f-medium f-16">{{ calification.calificacion }}</p>
+                        <p class="f-medium f-16">{{ infoDelivery?.calificacionCliente }}</p>
                     </div>
                     <div class="d-middle">
                         <div class="wh-24 d-middle-center">
-                            <i class="f-25" :class="calification.type == 1 ? 'icon-account' : 'icon-restaurant'" />
+                            <i class="f-25 icon-account"  />
                         </div>
-                        <p class="f-14">({{ calification.cantidadPuntos }})</p>
+                        <p class="f-14">({{ infoDelivery?.cantidadCliente }})</p>
+                    </div>
+                </div>
+                <div    class="d-middle gap-2 mb-2">
+                    <div class="d-middle gap-2 bg-orange-badge rounded-pill p-1 pe-2">
+                        <div class="wh-24 d-middle-center">
+                            <i class="icon-star text-orange f-25" />
+                        </div>
+                        <p class="f-medium f-16">{{ infoDelivery?.calificacionRestaurante }}</p>
+                    </div>
+                    <div class="d-middle">
+                        <div class="wh-24 d-middle-center">
+                            <i class="f-25 icon-restaurant" />
+                        </div>
+                        <p class="f-14">({{ infoDelivery?.cantidadRestaurante }})</p>
                     </div>
                 </div>
             </div>
@@ -57,7 +72,7 @@
             <div class="d-middle-bt">
                 <div class="d-middle">
                     <i class="icon-pin-direction f-25 text-red" />
-                    <p class="f-14">Ya está en el punto de entrega</p>
+                    <p class="f-14">Entrega {{ infoDelivery?.entregaHora }}</p>
                 </div>
                 <el-tooltip content="Ver ubicación" placement="bottom" effect="light">
                     <div class="d-middle-center box-shadowBox rounded-circle cr-pointer item-with-hover wh-32">
@@ -89,7 +104,7 @@
         </div>
     </modal>
     <drawerChatCliente ref="refDrawerChatCliente" :informationChatCliente="chatDeLaOrden" chatTitle="Chat de la orden" @sendMessage="addMessageChat" @openFile="sendImageFile" />
-    <modalDomiciliarioAsignar ref="refModalDomiciliarioAsignar" :domiciliario="domiciliariosDisponibles" />
+    <modalDomiciliarioAsignar ref="refModalDomiciliarioAsignar" :domiciliarios="listDelivery" :reloadDeliveryFour="reloadDeliveryThree" />
 </template>
 
 <script setup>
@@ -97,20 +112,39 @@ import modal from '../../../shared/components/modal.vue';
 import modalDomiciliarioAsignar from './modalDomiciliarioAsignar.vue';
 import drawerChatCliente from './drawerChatCliente.vue';
 import { ref } from 'vue';
+import  axios  from 'axios'
+
 
 const refModalEliminarDomiciliario = ref()
 const refModalUbicacionDomiciliario = ref()
 const refModalDomiciliarioAsignar = ref()
 const  refDrawerChatCliente = ref()
 
-const domiciliariosDisponibles = ref([
-    { photo: '/img/emptyState/woUsers.jpg', name: 'Daniel Correa', state: 1, id: '123465', pedidosAsignados: 7 }
-])
+const props = defineProps({
+    reloadDeliveryThree:{
+        type:Function
+    },
+    infoDelivery:{
+        type:Object
+    }
+   
+})
+const listDelivery = ref([])
 
-const calificationDomiciliario = ref([
-    { type: 1, calificacion: '4.8', cantidadPuntos: 100 },
-    { type: 2, calificacion: '5.0', cantidadPuntos: 50 },
-])
+async function openModalAsignarDomiciliario(){
+
+    refModalDomiciliarioAsignar.value.open()
+
+    try {
+        const response = await axios.get(`http://127.0.0.1:8000/api/domiciliarios`)
+        listDelivery.value = response.data.data ?? []
+        console.log('list delivery',response.data.data);
+
+   } catch (error) {
+     console.error(error)
+   }
+
+}
 
 const chatDeLaOrden = ref([
     { type: 2, message: null, url: '/img/emptyState/bannerRestaurante.png', horaEstandar: new Date() },
@@ -118,9 +152,7 @@ const chatDeLaOrden = ref([
     { type: 1, message: 'Hola', horaEstandar: new Date() },
 ])
 
-function openModalAsignarDomiciliario(){
-    refModalDomiciliarioAsignar.value.open()
-}
+
 
 function openDrawerChatCliente(){
     refDrawerChatCliente.value.open()

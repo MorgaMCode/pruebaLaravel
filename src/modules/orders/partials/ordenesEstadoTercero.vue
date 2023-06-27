@@ -5,23 +5,23 @@
                 <i class="icon-account f-25" />
             </div>
             <div class="d-flex flex-column gap-1 w-190px">
-                <p class="f-medium f-16">Jonathan Alexis Ballesteros</p>
-                <p class="text-whitesmoke f-14">2 Pedidos últ. mes</p>
-                <p class="text-whitesmoke f-14">10 Pedidos últ. año</p>
-                <div class="bg-green-clear br-8 wM-114px text-center px-1" style="padding: 2px 0px;">
+                <p class="f-medium f-16">{{ infoUser.nombre }}</p>
+                <p v-if="infoUser.pedidosUltimoMes" class="text-whitesmoke f-14">{{ infoUser.pedidosUltimoMes }} Pedidos últ. mes</p>
+                <p v-else class="text-whitesmoke f-14">{{ infoUser.pedidoUltimoAnio }} Pedidos últ. año</p>
+                <div v-if="infoUser.primerPedido" class="bg-green-clear br-8 wM-114px text-center px-1" style="padding: 2px 0px;">
                     <p class="f-14">Primer pedido</p>
                 </div>
-                <div v-if="mostrarChatCliente" class="hoverChatCliente d-middle border position-relative cr-pointer br-18 mt-2" @click="openDrawerChatCliente">
+                <div v-if="infoUser.chat" class="hoverChatCliente d-middle border position-relative cr-pointer br-18 mt-2" @click="openDrawerChatCliente">
                     <i class="icon-chat f-25" />
                     <p class="f-medium f-14">Chat con el cliente</p>
                     <div class="d-middle-center bg-red-badge rounded-pill position-absolute wM-25px" style="right: -10px; padding: 0 6px;">
-                        <p class="text-white f-12">8</p>
+                        <p  class="text-white f-12">{{ infoUser.chatMensajes }}</p>
                     </div>
                 </div>
             </div>
             <div class="d-flex flex-column gap-3 ms-auto align-self-start">
                 <div class="d-middle-end">
-                    <p>99</p>
+                    <p>{{ infoUser.puntosNegativos }}</p>
                     <el-tooltip content="Puntos negativos" placement="bottom" effect="light">
                         <i class="icon-alerta text-orange f-25" />
                     </el-tooltip>
@@ -44,14 +44,30 @@
                 </div>
             </div>
         </div>
-        <div v-for="store in storeInformation" class="d-middle gap-2 mt-3">
-            <div class="wh-32 bg-red-badge d-middle-center rounded-circle align-self-start">
-                <i class="f-25" :class="store.icon" />
+        <div v-if="infoUser.tipoPedido === 1" class="d-middle gap-2 mt-3">
+            <div class="wh-32 bg-green-clear d-middle-center rounded-circle align-self-start">
+                <i class="f-25 icon-home"  />
             </div>
             <div class="w-300px d-flex flex-column gap-2">
-                <p class="f-14">{{ store.direccion }} <br /> {{ store.residencia }} </p>
-                <p v-if="store.barrio" class="f-medium f-14">Barrio: <span class="f-light">{{ store.barrio }}</span> </p>
-                <p v-if="store.recepcion" class="f-medium f-14">{{ store.recepcion }}</p>
+                <p class="f-14">{{ infoUser.direccion?? "Sin direccion" }} <br /> {{ infoUser.direccionObservacion }} </p>
+                <p  class="f-medium f-14">Barrio: <span class="f-light">{{ infoUser.barrio }}</span> </p>
+                <p  class="f-medium f-14">{{ infoUser.observacionEntrega?? "" }}</p>
+            </div>
+        </div>
+        <div v-if="infoUser.tipoPedido === 2" class="d-middle gap-2 mt-3">
+            <div class="wh-32 bg-green-clear d-middle-center rounded-circle align-self-start">
+                <i class="f-25 icon-restaurant"  />
+            </div>
+            <div class="w-300px d-flex flex-column gap-2">
+                <p class="f-14">Recoger en tienda <br />  </p>
+            </div>
+        </div>
+        <div v-if="infoUser.tipoPedido === 3" class="d-middle gap-2 mt-3">
+            <div class="wh-32 bg-green-clear d-middle-center rounded-circle align-self-start">
+                <i class="f-25 icon-table"  />
+            </div>
+            <div class="w-300px d-flex flex-column gap-2">
+                <p class="f-14">Servir en :{{ infoUser.mesa?? "" }} <br />  </p>
             </div>
         </div>
     </div>
@@ -99,6 +115,11 @@ let props = defineProps({
         type: Boolean,
         required: false,
         default: true
+    },
+    infoUser:{
+        type: Object,
+        required: false,
+        default: ()=>{}
     }
 })
 
@@ -110,11 +131,7 @@ const valorRadioReportarCliente = ref([
     { value: 5, text: 'Información falsa' },
 ])
 
-const storeInformation = ref([
-    { icon: 'icon-home', direccion: 'Calle 62 #7w-27', residencia: 'Apartamento 301 Edificio Santa Lucia', barrio: 'Ciudadela', recepcion: 'Dejar en recepción, puerta principal.' },
-    { icon: 'icon-restaurant', direccion: 'Recoge en tienda' },
-    { icon: 'icon-table', direccion: 'Servir en mesa: P1 - 1' },
-])
+
 
 const chatDeLaOrden = ref([
     { type: 2, message: null, url: '/img/emptyState/bannerRestaurante.png', horaEstandar: new Date() },

@@ -1,9 +1,9 @@
 <template>
     <div :id="idi"  class="d-flex-column gap-3 px-3" :class="borderAbajo">
         <div class="d-middle-bt">
-            <p class="f-medium f-18">No. {{ state?.serialNumber }}</p>
+            <p class="f-medium f-18">No. {{ state?.id }}</p>
             <div class="d-middle gap-2">
-                <stateOrders :states="state?.state" />
+                <stateOrders :states="state?.estado" />
                 <el-popover
                 placement="bottom"
                 :width="184"
@@ -24,8 +24,8 @@
                 </el-popover>
             </div>
         </div>
-        <div v-if="state?.state === 1" class="d-flex j-center gap-2">
-            <button class="btn bg-general text-white f-14" @click="openModalConfirmarPedido"><p class="f-14">Confirmar</p></button>
+        <div v-if="state?.estado === 11" class="d-flex j-center gap-2">
+            <button  class="btn bg-general text-white f-14" @click="openModalConfirmarPedido"><p class="f-14">Confirmar</p></button>
             <button class="btn border"><p class="f-14" @click="openModalRechazarOrden">Rechazar</p></button>
             <div class="d-middle bg-gray-light br-8 pe-2 ps-1 item-with-hover cr-pointer" @click="openModalCederOrden">
                 <i class="icon-change f-25" />

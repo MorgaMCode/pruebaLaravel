@@ -71,6 +71,7 @@ import { useRouter } from 'vue-router';
 import axios from "axios";
 import { onBeforeMount } from 'vue';
 import { Search } from '@element-plus/icons-vue'
+import  qs  from 'qs';
 
 
 const search = ref('')
@@ -86,85 +87,11 @@ onBeforeMount(() => {
     getOrdersList()
 })
 
-const datas = ref([
-    {
-        title: 'Todas',
-        options: [
-            { id: 50, optionOne: 'Todas' },
-            { id: 51, optionOne: 'Con chat activo', value: 1 },
-        ]
-    },
-    {
-        title: 'Estado',
-        options: [
-            { id: 52,  optionOne: 'Creado', value: 11 },
-            { id: 53,  optionOne: 'Aceptado', value: 12 },
-            { id: 54,  optionOne: 'Preparado/Alistado', value: 13 },
-            { id: 55,  optionOne: 'Enviado', value: 15 },
-        ]
-    },
-    {
-        title: 'Tipo de entrega',
-        options: [
-            { id: 56,  optionOne: 'Domicilio', value: 1 },
-            { id: 57,  optionOne: 'Recoger', value: 2 },
-            { id: 58,  optionOne: 'Mesa', value: 3 }
-        ]
 
-    },
-])
 
-// const informationOrdersSelect = ref([])
 const informationOrdersSelect = ref([])
 
-const informationProductsOrders = ref([
-    {
-        img: '/img/trash/burguerKiller.png',
-        title: 'Hamburguesa The Killers',
-        oferta: 'x 2',
-        precioOferta: '20.000',
-        precioNormal: '25.000',
-        productoCaracteristicas: [
-            {
-                title: 'Personaliza tu Hamburguesa',
-                caracteristicas: [
-                    { text: 'Queso americano gratinado', numberOferta: '1' }
-                ],
-            },
-            {
-                title: 'Elige tus extras',
-                caracteristicas: [
-                    { text: 'Queso americano gratinado', price: '2.000', numberOferta: '2' },
-                    { text: 'Tocineta ahumada', price: '3.000', numberOferta: '1' },
-                ],
-            }
-        ]
-    },
-    {
-        img: '/img/trash/burguerKiller.png',
-        title: 'Hamburguesa Clásica Rock',
-        oferta: 'x 1',
-        precioOferta: '20.000',
-        precioNormal: '26.000',
-        productoCaracteristicas: []
-    },
-    {
-        img: '/img/trash/kornOasis.png',
-        title: 'Korn Oasis',
-        oferta: 'x 1',
-        precioOferta: 0,
-        precioNormal: '28.300',
-        productoCaracteristicas: [
-        {
-                title: 'Elige tus salsas Extra',
-                caracteristicas: [
-                    { text: 'Queso americano gratinado', numberOferta: '2' },
-                    { text: 'Tocineta ahumada', numberOferta: '1' },
-                ],
-            }
-        ]
-    },
-])
+
 
 function saveData(index,option, i){
 
@@ -188,7 +115,6 @@ function saveData(index,option, i){
         
     }
     
-    console.log('Estos los datos guardados: ', optionSelectedAll.value);
 }
 
 function  filterOrder(search){
@@ -196,8 +122,7 @@ function  filterOrder(search){
 }
 const getOrdersList = async (buscarAlgo)=>{
     try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/ordenes/13?buscar=${buscarAlgo ?? ''}`)
-        console.log(response.data.data)
+        const response = await axios.get(`http://127.0.0.1:8000/api/ordenes/${13}?buscar=${buscarAlgo ?? ''}`)
         informationOrdersSelect.value = response.data.data
     } catch (error) {
          console.error(error)
@@ -208,21 +133,40 @@ function clearOptions(){
     arrayOne.value = []
     arrayTwo.value = []
     arrayThree.value =[]
+    tipoPedido.value = null
+    estado.value = null
+    chatActivo.value = null
+    getOrdersList();
 }
+
+
+
+
 async function  saveOptions(){
-    if(chatActivo.value || estado.value || tipoPedido.value){
+    const params = {};
+
+
+    if (chatActivo.value) {
+
+        params.chatActivo = chatActivo.value    
+    }
+    if (estado.value) {
+
+        params.estado = estado.value    
+    }
+    if (tipoPedido.value) {
+
+        params.tipoPedido = tipoPedido.value    
+    }
+
         try {
-            const response = await axios.get(`http://127.0.0.1:8000/api/ordenes/13?chatActivo=${chatActivo.value ?? false}&estado=${estado.value}&tipoPedido=${tipoPedido.value}`);
-            // const response = await axios.get(`http://127.0.0.1:8000/api/ordenes/13`,{chatActivo:chatActivo.value, estado:estado.value, tipoPedido:tipoPedido.value})
-            console.log(response.data.data)
+            const response = await axios.get(`http://127.0.0.1:8000/api/ordenes/13?${qs.stringify(params)}`);
+            console.log('antes',informationOrdersSelect.value,length);
             informationOrdersSelect.value = response.data.data
+           // console.log('despues',informationOrdersSelect.value);
         } catch (error) {
              console.error(error)
         }
-    }
-   
-    
-    console.log(optionSelectedAll.value);
 }
 
 </script>

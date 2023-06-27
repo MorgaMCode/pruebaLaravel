@@ -1,18 +1,18 @@
 <template>
-    <div class="d-flex flex-column gap-4">
+    <div v-for="(elemnt, index) in datas" :key="index" class="d-flex flex-column gap-4" style="border-bottom: 3px solid #e1e1e1;;">
         <div class="d-middle-bt px-3 py-2">
             <div class="d-middle-center wh-32 bg-whitesmoke3 rounded-circle">
                 <i class="icon-change f-25" />
             </div>
             <div class="w-100 ms-2">
                 <div class="d-middle-bt me-5">
-                    <p class="f-medium f-14">Cedida de: <span class="f-light text-whitesmoke">"Sotomayor"</span></p>
+                    <p class="f-medium f-14">Cedida de: <span class="f-light text-whitesmoke">{{ elemnt?.tienda }}</span></p>
                     <div class="d-middle">
                         <i class="icon-clock f-25" />
-                        <p class="f-light f-14">12:05 p.m.</p>
+                        <p class="f-light f-14">{{ elemnt?.hora }}</p>
                     </div>
                 </div>
-                <p class="f-light text-whitesmoke f-14">5 Jul. 2022, por Jaime Gonzales</p>
+                <p class="f-light text-whitesmoke f-14">{{ elemnt?.fecha }}, {{ elemnt?.usuario }}</p>
             </div>
             <el-tooltip content="Ver historial" placement="bottom" effect="light">
                 <div class="wh-32 d-middle-center icon-hover-blue cr-pointer rounded-circle" @click="openModalHistorial">
@@ -30,7 +30,12 @@ import { ref } from 'vue';
 import QRcode from 'qrcode';
 
 const refModalHistorial = ref()
-
+const props = defineProps({
+    datas:{
+        type: Array,
+        default: () => []
+    }
+});
 const informationHistorialDeOrden = ref([
     {
         fecha: '5 Jul. 2022',
