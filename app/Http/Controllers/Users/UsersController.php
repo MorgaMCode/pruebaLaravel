@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Users;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
@@ -18,20 +19,10 @@ class UsersController extends Controller
             return response($v->errors());
         }
         try {
-            $usersDelivery = DB::table('yap_datos.users as ydu')
-           ->select('ydu.id','ydu.nombre','ydud.fotoMini')
-           ->leftJoin('yap_datos.usersDeliverys as ydud','ydud.idUser','ydu.id')
-           ->where('tipo',41)
-           ->get();
 
-           if($request['nombre'] )
-           {
-               $filterDeliverys  = collect($usersDelivery)->filter(function ($item) use ($request) {
-                if( str_contains(Strval(strtolower($item->nombre )), strtolower($request['nombre'])) ) return $item;
-                })->values();
-                return response()->json(['messages' => 'consultado correctamente','data'=>$filterDeliverys],200);
-           }
-           return response()->json(['messages' => 'consultado correctamente','data'=>$usersDelivery],200);
+            $data =  User::getListUserDelivery($request['nombre']);
+
+           return response()->json(['messages' => 'consultado correctamente','data'=> $data],200);
 
         } catch (\Exception $e) {
             return response($e);

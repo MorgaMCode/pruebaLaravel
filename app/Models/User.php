@@ -10,7 +10,16 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
+
     use HasApiTokens, HasFactory, Notifiable;
+
+    protected $connection = 'mysql';
+    protected $table = 'users';
+
+
+
+
+
 
     /**
      * The attributes that are mass assignable.
@@ -41,4 +50,29 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public static function getListUserDelivery($nombre){
+        try {
+            $deliverys =  self::select('users.id','users.nombre','ydud.fotoMini')
+           ->leftJoin('yap_datos.usersDeliverys as ydud','ydud.idUser','users.id')
+           ->where('tipo',41)
+           ->when(isset($nombre),function ($q) use($nombre){
+            return $q->having('users.nombre', 'like' ,"%$nombre%");
+        })
+        ->limit(40)
+           ->get();
+           return $deliverys;
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+
+    public static function getUser($id){
+        try {
+            return  self::where('id',$id)->first();
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+
 }

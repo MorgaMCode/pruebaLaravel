@@ -2,21 +2,37 @@
 
 namespace App\Http\Controllers\Ordenes;
 
+use stdClass;
+
+use Carbon\Carbon;
+use App\Models\User;
+use App\Models\Orden;
+use App\Models\XTipo;
+use App\Models\ZBanco;
+
+use App\Models\Producto;
+use App\Models\OrdenDato;
+use App\Models\OrdenEstado;
+use App\Models\OrdenTienda;
 use Illuminate\Http\Request;
+use App\Models\OrdenProducto;
 
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use Carbon\Carbon;
-use Hamcrest\Core\HasToString;
-use Illuminate\Support\Facades\Validator;
+use App\Models\OrdenProductoTopping;
+use App\Models\Topping;
+use App\Models\ToppingGrupo;
 
 use function PHPUnit\Framework\isNull;
+use Illuminate\Support\Facades\Validator;
 
 class OrdenesController extends Controller
 {
+
     public  function getList(Request $request,$id){
        try {
+
         $request['id']=$id;
         $v = Validator::make($request->all(),[
             'id' =>'required|integer',
@@ -43,11 +59,12 @@ class OrdenesController extends Controller
         ->selectRaw("(date_format(o.entregaHora, '%h:%i %p'))as entregaHora")
         ->selectRaw("(date_format(o.createdAt, '%h:%i %p'))as horaCreado")
         ->selectRaw("(date_format(o.entregaHora, '%Y-%m-%d'))as dia")
-        ->selectRaw("(select count(*) from ordenesProductos as op where op.idOrden = o.id) as cantidadProductos")
+        ->selectRaw("(select count(*) from yap_restaurantes.ordenesProductos as op where op.idOrden = o.id) as cantidadProductos")
         //->selectRaw("(select if(count(*)>0,1,0) from yap_datos.ordenesChats as doc where doc.idOrdenRestaurante = o.id) as tieneChat")
         ->selectRaw("1 as tieneChat")
         ->leftJoin('yap_restaurantes.ordenesDatos as od','od.idOrden','o.id')
         ->whereIn('o.estado',[11,12,13,14,15])
+        ->where('o.idTienda',$id)
         ->when(isset($request->tipoPedido),function ($q) use($request){
             return $q->where('tipoPedido',$request->query('tipoPedido'));
         })
@@ -81,7 +98,10 @@ class OrdenesController extends Controller
             }else if ($value == $tomorrow){
                 $day = 'Mañana';
             }else {
-                $day = $value;
+
+                $day =  ucfirst(Carbon::parse($value)->locale('es')->translatedFormat('l, d F '));
+
+
             };
             $data[] = [
                 'fecha' => $day,
@@ -118,7 +138,7 @@ class OrdenesController extends Controller
                     ->first();
 
                 return [
-                        'fecha'=>Carbon::parse($itemOrder->createdAt)->format('j F Y'),
+                        'fecha'=>Carbon::parse($itemOrder->createdAt)->locale('es')->translatedFormat('j M Y'),
                         'hora'=>Carbon::parse($item->fechaOrden)->format('g:i a'),
                         'usuario'=>$user->nombre,
                         'tienda'=>$tenda->nombre
@@ -127,13 +147,13 @@ class OrdenesController extends Controller
                 return [
                     'id' => $item->id ,
                     'estado' => $item->estado,
-                    'fechaOrden' => Carbon::parse($item->fechaOrden)->format('j F Y'),
+                    'fechaOrden' => Carbon::parse($item->fechaOrden)->locale('es')->translatedFormat('j M Y'),
                     'horaOrden' =>  Carbon::parse($item->fechaOrden)->format('g:i a'),
-                    'fechaEntrega' => Carbon::parse($item->entregaHora)->format('j F Y '),
+                    'fechaEntrega' => Carbon::parse($item->entregaHora)->locale('es')->translatedFormat('j M Y '),
                     'horaEntrega' => Carbon::parse($item->entregaHora)->format('g:i a'),
                     'historialCedida' => $cedido
                 ];
-            });
+            })->first();
             return response()->json(['message' => 'consultado correctamente', 'data' => $data],200);
         } catch (\Exception $e) {
             return response($e);
@@ -158,25 +178,26 @@ class OrdenesController extends Controller
             ->where('o.id',$idOrden)
             ->first();
 
-            $order = DB::table('yap_restaurantes.ordenes as o')
-            ->where('o.createdBy',$userData->userId)
-            ->get();
+             $order =  Orden::getOrderCreatedBy($userData->userId);
+
 
         $user = DB::table('yap_datos.users')->where('id',$userData->userId)->first();
 
+
         $data =  [
             'id' => $userData->id,
-            'nombre' => $user->nombre,
+            'nombre' => $user->nombre.' '.$user->apellido,
+            'usuarioReportado' => $order->where('idPuntoNegativo','!=',null)->count(),
             'puntosNegativos'=>$userData->puntosNegativos,
             'pedidosUltimoMes'=>$userData->pedidosUltimoMes,
             'pedidoUltimoAnio'=>$userData->pedidosUltimoAnio,
-            'primerPedido'=>$userData->primerPedido ? true : false,
-            'chat'=>$userData->chats ? true : false,
+            'primerPedido'=>$userData->primerPedido ? 1 : 0,
+            'chat'=>$userData->chats ? 1 : 0,
             'chatMensajes'=>$userData->chats ,
             'direccion'=>$userData->direccion ,
-            'direccionObservacion'=>$userData->direccionObservacion ,
-            'barrio'=>$userData->entregaBarrio ,
-            'observacionEntrega'=>$userData->observacionEntrega ,
+            'direccionObservacion'=>ucfirst($userData->direccionObservacion),
+            'barrio'=>ucfirst($userData->entregaBarrio),
+            'observacionEntrega'=>ucfirst($userData->observacionEntrega ),
             'tipoPedido'=>$userData->tipoPedido ,
             'mesa'=>$userData->mesa,
             'reportes'=>$userData->reportes
@@ -189,17 +210,213 @@ class OrdenesController extends Controller
         }
     }
 
-
     public function getOrderDelivery($idTienda,$idOrden){
         try {
-             $userDeliveryId = DB::table('yap_restaurantes.ordenes as yro')
-            ->select('*')
-            ->leftJoin('yap_datos.users as ydu','ydu.id','yro.idUserDelivery')
-            ->where('yro.id',$idOrden)->first();
 
-            return [
-                'idUserDelivery'=>$userDeliveryId->idUserDelivery,
+
+                $calificated = new stdClass();
+                $userDelivery = Orden::getOrderUserDeliveryId($idOrden);
+                if($userDelivery){
+                    $calificated = collect(Orden::getOrderInfoDelivery($userDelivery->idUserDelivery))->first();
+                }
+
+
+            $data =  [
+                'idUserDelivery'=>$userDelivery->idUserDelivery?? null,
+                'nombre'=>$userDelivery->nombre?? "",
+                'fotoMini'=>$userDelivery->fotoMini?? "",
+                'calificacionCliente'=> $calificated->calificacionDeliveryCliente?? 0.0,
+                'cantidadCliente'=>$calificated->cantidadCliente?? 0,
+                'calificacionRestaurante'=>$calificated->calificacionRestaurante?? 0.0,
+                'cantidadRestaurante'=>$calificated->restauranteCantidad?? 0,
+                'entregaHora'=>$calificated->entregaHora?? ""
             ];
+
+            return response()->json(['message' => 'consultado correctamente', 'data'=>$data]);
+
+        } catch (\Exception $e) {
+            return response($e);
+        }
+    }
+
+    public function postOrderDelivery(Request $request,$idTienda,$idOrden){
+        $request['idTienda'] = $idTienda;
+        $request['idOrden'] = $idOrden;
+        $v = Validator::make($request->all(),[
+            'idUserDelivery'  => 'required|int|exists:users,id',
+            'idTienda'=> 'required|int',
+            'idOrden'=>  'required|int|exists:mysql2.ordenes,id',
+        ],[
+            '*.required'=>' el campo :attribute es obliogatorio',
+            '*.integer'=>' el campo :attribute debe ser un numero entero'
+        ]);
+        $v->after(function ($validate)use($request) {
+            $user = User::where('id',$request->idUserDelivery)->first();
+            if($user->tipo != 41){
+                $validate->errors()->add('idUserDelivery','El usuario no es un domiciliario');
+            }
+        });
+        if($v->fails()){
+            return response()->json(['message' => $v->errors()],400);
+        }
+        try {
+            $assingDelivery = Orden::postOrderDelivery($idTienda,$idOrden,$request->idUserDelivery);
+            return   self::getOrderDelivery($idTienda,$idOrden);
+        } catch (\Exception $e) {
+            return response($e);
+        }
+    }
+
+    public function getDetailPay($idTienda,$idOrden){
+        try {
+            $orderData =  Orden::getOrderData($idOrden);
+            $orderProducts =  OrdenProducto::getOrderProducts($idOrden);
+
+            if ($orderData->formaPago !== 1) {
+
+                $zBank = ZBanco::getOneData($orderData->idCuentaBanco?? null);
+                $bankInfo = XTipo::getType($zBank->idBanco?? null);
+                $user = User::getUser($orderData->idUserTransferenciaConfirmada);
+                $tranfer = [
+                    'banco'=>$bankInfo->nombre,
+                    'imagen'=>$bankInfo->imagen ,
+                    'cuentaTipo'=>$zBank->cuentaTipo,
+                    'cuentaNumero'=>$zBank->cuentaNumero,
+                    'tranferenciaArchivo'=>$orderData->transferenciaArchivo,
+                    'tranferenciaEstado'=>$orderData->transferenciaEstado,
+                    'userTranferencia'=>$user->nombre?? "",
+                    'tranferenciaConfirmadaFecha'=>Carbon::parse($orderData->transferenciaConfirmadaFecha)->locale('es')->translatedFormat('d M, h:m A ')
+                ];
+            }
+
+
+            $data = [
+                'valorProductos'=>$orderData->valorProductos,
+                'cantidadProductos'=>$orderProducts->sum('cantidad'),
+                'valorToppings'=>$orderData->valorToppings,
+                'descuentoPromo'=>$orderData->valorDescuentoOrden+$orderData->valorDescuentoProducto,
+                'valorDomicilio'=>$orderData->valorDomicilio,
+                'valorFinal'=>$orderData->valorFinal,
+                'formaPago'=>$orderData->formaPago,
+                'tranferencia'=> $tranfer ?? null
+
+            ];
+            return response()->json(['message' => 'consultado correctamente','data' => $data]);
+        } catch (\Exception $e) {
+            return response($e);
+        }
+    }
+
+    public function postConfirmPay(Request $request,$idTienda,$idOrden){
+        try {
+
+            $request['idTienda']= $idTienda;
+            $request['idOrden']= $idOrden;
+
+            $v = Validator::make($request->all(),[
+                'confirmar'=> ['required','integer',Rule::in([2,3])],
+                'idTienda'=> 'required|int|exists:mysql.tiendas,id',
+                'idOrden'=>  'required|int|exists:mysql2.ordenes,id',
+            ],[
+                '*.required'=>' el campo :attribute es obliogatorio',
+                '*.integer'=>' el campo :attribute debe ser un numero entero',
+                '*.in'=>' el campo :attribute debe se 2 para confirmar o 3 para rechazar',
+                '*.exists'=>'no existen registros de :attribute'
+            ]);
+            if($v->fails()){
+                return response()->json(['message' => $v->errors()],400);
+            }
+            $updateOrder = OrdenDato::postConfirmPay($request);
+
+            return self::getDetailPay($idTienda,$idOrden);
+        } catch (\Exception $e) {
+            return response($e);
+        }
+    }
+
+    public function getIntructions($idTienda,$idOrden){
+        try {
+            $result = OrdenDato::getOrderDate($idOrden)->observacionOrden;
+            $data = [
+                'observacionOrden' => $result
+            ];
+            return response()->json(['message' => 'consultado correctamente','data' => $data]);
+        } catch (\Exception $e) {
+            return response($e);
+        }
+    }
+
+    public function getHistoryStatus($idTienda,$idOrden){
+        try {
+
+            $dataOrderDelivered =OrdenTienda::getListOrderDelivered($idOrden)->map(function ($value){
+
+                $userCreator = User::getUser($value->createdBy);
+
+                return [
+                    'id'=>$value['id'],
+                    'estado'=>"Cedido",
+                    'fecha'=>Carbon::parse($value['createdAt'])->locale('es')->translatedFormat('d M Y'),
+                    'hora'=>Carbon::parse($value['createdAt'])->locale('es')->translatedFormat('h:m A'),
+                    'por'=>$userCreator->nombre." ".$userCreator->apellido
+                ];
+            });
+
+            $data  = OrdenEstado::getOrderStatusByOrder($idOrden)->map(function ($value){
+
+                $userCreator = User::getUser($value->createdBy);
+
+                return [
+                    'id'=>$value['id'],
+                    'estado'=>$value['estado'],
+                    'fecha'=>Carbon::parse($value['createdAt'])->locale('es')->translatedFormat('d M Y'),
+                    'hora'=>Carbon::parse($value['createdAt'])->locale('es')->translatedFormat('h:m A'),
+                    'por'=>$userCreator->nombre." ".$userCreator->apellido
+                ];
+            })->concat($dataOrderDelivered);
+
+            return response()->json(['message' => 'consultado correctamente','data' => $data]);
+        } catch (\Exception $e) {
+            return response($e);
+        }
+    }
+
+    public function getProductsByOrderId($idTienda,$idOrden){
+        try {
+            $data  = OrdenProducto::getOrderProducts($idOrden)->map(function($value){
+                        $product = Producto::getProduct($value->idProducto);
+
+                        $gropuToppings = OrdenProductoTopping::getGroupToppingsInfo($value->id)->map(function ($item)use($value){
+
+                            $idsToppings = OrdenProductoTopping::getGroupToppingsInfo($value->id)->where('idGrupoTopping',$item->idGrupoTopping)->values();
+                            $toppingInfo = Topping::getToppings($idsToppings->pluck('idTopping'))->map(function ($topping)use($item) {
+                                return [
+                                    'id'=>$topping->id,
+                                    'nombre'=>$topping->nombre,
+                                    'cantidad'=>$item->cantidad,
+                                    'precioToppingTotal'=>$item->precioToppingTotal
+                                ];
+                            });
+
+                            return  [
+                                'id'=>$item->idGrupoTopping,
+                                'nombre'=>ToppingGrupo::getGroupToppingsById($item->idGrupoTopping)->nombre,
+                                'toppings'=>$toppingInfo
+                            ];
+                        })->unique('id');
+
+                        return [
+                            'id' => $value->id,
+                            'imagenMini'=>$product->imagenMini,
+                            'nombre'=>$product->nombre,
+                            'cantidad'=>$value->cantidad,
+                            'precioTeorico'=>$value->precioTeorico,
+                            'precioProducto'=>$value->precioProducto,
+                            'toppingsGrupos'=>$gropuToppings
+                        ];
+                    });
+            return response()->json(['message' => 'consultado correctamente','data' => $data]);
+
         } catch (\Exception $e) {
             return response($e);
         }
